@@ -1,0 +1,34 @@
+import psutil # type: ignore
+
+def get_running_cheats(cheat_names):
+    """Checks which cheat processes are running."""
+    running_cheats = []
+    for process in psutil.process_iter(attrs=['name']):
+        if process.info['name'].lower() in [c.lower() for c in cheat_names]:
+            running_cheats.append(process.info['name'])
+    return running_cheats
+
+def monitor_cheat_process(cheat_names):
+    """Monitors when a cheat or executor process starts and stops."""
+    print("Monitoring for cheats/executors...")
+    detected_cheats = set()
+    
+    while True:
+        running_cheats = get_running_cheats(cheat_names)
+        
+        for cheat in running_cheats:
+            if cheat not in detected_cheats:
+                print(f"{cheat} has been opened.")
+                detected_cheats.add(cheat)
+        
+        for cheat in list(detected_cheats):
+            if cheat not in running_cheats:
+                print(f"{cheat} has been closed.")
+                detected_cheats.remove(cheat)
+                
+        if not detected_cheats:
+            break
+
+# Example Usage
+if __name__ == "__main__":
+    monitor_cheat_process(["cheat.exe", "executor.exe"])
